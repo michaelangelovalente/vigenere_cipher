@@ -2,10 +2,11 @@
 # takes a0 byte(letter) and sets v0 = 1 if the byte maps to an upper_case letter on the ASCII TABLE or v0 = 0 if the byte maps to a lower_case letter on the ASCII TABLE v0 = -999
 #Input:
 #	a0 : letter
+#Output:
+#	v0 = 0 (lowercase); v0 = 1(uppercase); v0=-1 (not_a_char)
 	.text
 	.globl is_upper
 is_upper:
-#rendo la funzione utilizzabile da qualsiasi altra funzione aggiungendo anche il fp
 	#saving registers
 	add $sp, $sp, -8
 	sw $ra 0($sp)
@@ -13,8 +14,6 @@ is_upper:
 	addi $fp, $sp, 4
 	
 	li $v0, -1
-	
-
 	
 
 	#checks if upper

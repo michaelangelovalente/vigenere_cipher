@@ -6,12 +6,11 @@
 	.globl char_val
 char_val:
 	#replace with heap usage
-	addi $sp, $sp, -16
+	addi $sp, $sp, -12
 	sw $ra 0($sp)
 	sw $s1 4($sp)
-	sw $s2 8($sp)###remove this later
-	sw $fp 12($sp)
-	addi $fp, $sp, 12
+	sw $fp 8($sp)
+	addi $fp, $sp, 8
 	
 	
 	move $s1, $a1
@@ -42,9 +41,8 @@ char_val:
 	
 	lw $ra 0($sp)
 	lw $s1 4($sp)
-	lw $s2 8($sp)###remove this later
-	lw $fp 12($sp)
-	addi $sp, $sp, 16
+	lw $fp 8($sp)
+	addi $sp, $sp, 12
 	
 	
 	jr $ra

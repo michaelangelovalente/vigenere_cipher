@@ -4,8 +4,7 @@ continuos_msg: .asciiz  "\nChoose (1)for the cipher function  (2)for the deciphe
 cipher_msg:    .asciiz "Enter a phase to cipher:"
 decipher_msg:  .asciiz "Enter a phrase to decipher:"
 not1or2:	  .asciiz "Invalid input!"
-key_inv_prompt:	  .asciiz "Invalid key!\nYour key must not contain space or any special characters."
-key_empty:	.asciiz "Your key must contain at least one character.\n"
+key_inv_prompt:	  .asciiz "Invalid key!\nYour key must not contain space or special characters."
 key_w_prompt:  .asciiz "Enter key a keyword:"
 result:   .asciiz "Result:"
 
@@ -78,14 +77,12 @@ main:
 		
 	
 	#cipher/decipher procedure access;
-	#vignere_cipher(a0=phrase,a1=key,a2=1(cipher)/2(decipher)) ---> a0=deciphered_phrase	
+	#cipher_one(a0=phrase,a1=key,a2=1(cipher)/2(decipher)) ---> a0=deciphered_phrase	
 	la $a0, phrase
 	la $a1, key
 	move $a2, $t0 # user decision 1==cipher 2===decipher
-	jal vignere_cipher
+	jal cipher_one
 	
-	#if v0 == -8 the key was empty
-	beq $v0, -8, empty_key
 	#if v0 == -9 --> the key entered was invalid
 	bne $v0, -9, vK#validkey  #-9 is being used to differntiate it from invalid_char in phrase
 	
@@ -106,15 +103,10 @@ main:
 	li $v0, 10
 	syscall
 
-	empty_key:
-	la $a0, key_empty
-	li $v0, 4
-	syscall
-	j restart
-	
+
 
 ################################################################
-#vignere_cipher modifies a0(phrase_to_decipher)
+#cipher_one modifies a0(phrase_to_decipher)
 #Input:
 #	a0 = phrase to decipher  
 #	a1 = key_word
@@ -125,7 +117,7 @@ main:
 key_values: .space 120 #longest word in the italian language (Precipitevolissimevolmente) has 26 chars ---> space (26*4)104 +16buffer
 
 	.text
-vignere_cipher:
+cipher_one:
 	#saving registers
 	add $sp, $sp, -24
 	sw $ra 0($sp)
@@ -167,14 +159,17 @@ vignere_cipher:
 	
 	j find_key
 	all_keys_found:
-	beq $s4, $zero, at_least_one
 	# k_values[n0,n1...ni]
 	#s4 = number_of_elements(k_values)
 	############################################################
 	
+	
+	
+	#REMOVEDla $t4, key_values# refresh address t4 = &key_values[0]
 	li $t5, 0 #nth_key_value --> will be used to count position(i) in key_values
 	
-	#de/ciphering loop
+
+	#ciphering loop
 	loop:
 		######################################################################
 		#cycles to key[0..n-1] until loop ends
@@ -231,7 +226,7 @@ vignere_cipher:
 		move $a0, $s3 # $a0 = char_ASCII_value
 		jal is_upper# a0= byte char; #returns v0 = 0 if lowercase; v0 = 1 if uppercase; v0 = -1 if not a letter
 		beq $v0, $zero, lowercase
-
+		#beq $t4, -1, not_a_letter
 		
 		#Uppercase cipher
 		addi $t3, $t3, 65
@@ -272,12 +267,9 @@ vignere_cipher:
 	li $v0, -9#-9 is being used to differntiate it from invalid_char in phrase(-1)
 	j end_loop
 
-	at_least_one:
-	li $v0, -8 # -8 key was empty error
-	j end_loop
 ################################################################
 #is_upper
-# takes a0 byte(letter) and sets v0 = 1 if the byte maps to an upper_case letter on the ASCII TABLE  v0 = 0 if the byte maps to a lower_case letter on the ASCII TABLE otherwise v0 = -1
+# takes a0 byte(letter) and sets v0 = 1 if the byte maps to an upper_case letter on the ASCII TABLE or v0 = 0 if the byte maps to a lower_case letter on the ASCII TABLE v0 = -999
 #Input:
 #	a0 : letter
 #Output:

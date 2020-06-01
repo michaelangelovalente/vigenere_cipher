@@ -1,3 +1,14 @@
+	.data
+letters: .asciiz "rr"
+	la $t0, letters
+	loop:
+	lb $a0 0($t0)
+	jal char_val
+	addi $t0, $t0,1
+	
+	j loop
+
+
 #fixed it, but check if it works with edge case scenarios
 
 #a1 = letter(byte)
